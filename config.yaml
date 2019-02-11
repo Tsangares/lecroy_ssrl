@@ -1,0 +1,16 @@
+#Time is in units of minutes
+time:
+ signal: 1 #How long do we wait for the motor tigger
+ run: 5 #How long is a beam run
+ 
+ 
+ip: 0.0.0.0
+
+#Threshold is in V
+trigger:
+ motor:
+  channel: 1
+  threshold: 0
+ beam:
+  channel: 3
+  threshold: 0
