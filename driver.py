@@ -3,7 +3,6 @@ from contraption.Lecroy import LecroyWavepro725zi
 
 class LecroySSRL(LecroyWavepro725zi):
     CONFIG="config.yaml"
-    LECROY=False
     V=True
     
     def init(self,runNumber=0):
@@ -12,10 +11,9 @@ class LecroySSRL(LecroyWavepro725zi):
         self.runNumber=runNumber
         
         #Connect to lecroy
-        if LECROY:
-            super(LecroySSRL,self).__init__(config['ip'])
-            self.inst.timeout(15000)
-            self.local_store_setup("FILL")
+        super(LecroySSRL,self).__init__(config['ip'])
+        self.inst.timeout(15000)
+        self.local_store_setup("FILL")
 
         #Start on motor tigger or beam trigger?
         self.getMotor()
