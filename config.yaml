@@ -1,16 +1,20 @@
+#The ip_address of the lecroy
+ip: 192.168.1.12
+
+#runName is the name in ~/Desktop/ssrl/ that all data will be stored
+runName: "potatoe" 
+
 #Time is in units of minutes
 time:
- signal: 1 #How long do we wait for the motor tigger
- run: 5 #How long is a beam run
- 
- 
-ip: 0.0.0.0
+ motor: 1 #How long do we wait for the motor tigger 
+ beam: 1 #How long is a beam run
+ unit: "min" #Either min or sec
 
 #Threshold is in V
 trigger:
  motor:
-  channel: 1
+  channel: "1" #For auxillary trigger use "AUX" else use 1-4
   threshold: 0
  beam:
-  channel: 3
+  channel: "1"
   threshold: 0
