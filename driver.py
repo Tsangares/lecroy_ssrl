@@ -31,7 +31,8 @@ class LecroySSRL(LecroyWavepro725zi):
         self.changeDir(name)
     def changeDir(self,name):
         #self.inst.write(r'DIR "C:\Users\lecroy\Desktop\%s"'%name)
-        self.inst.write(r'DIR DISK,HDD,ACTION,SWITCH,"C:\Users\lecroy\Desktop\%s"'%name)
+        self.inst.write(r'VBS "app.SaveRecall.Waveform.WaveformDir = "C:\Users\lecroy\Desktop\%s"'%name
+        #self.inst.write(r'DIR DISK,HDD,ACTION,SWITCH,"C:\Users\lecroy\Desktop\%s"'%name)
         
     #Under the unfortunate cercumtstance that the motor trigger is never recieved
     #This function is run in an attempt to recover the program.
