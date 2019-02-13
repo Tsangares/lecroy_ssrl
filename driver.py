@@ -10,9 +10,14 @@ class LecroySSRL(LecroyWavepro725zi):
         self.config=LecroySSRL.getConfig()
         self.runNumber=runNumber
         self.runPrefix=r"ssrl\%s"%self.config['runName']
+        self.runData={
+                    'name': self.config['runName'],
+                    'totalEvents': 0,
+                    'info': {}
+                }
         #Connect to lecroy
         super(LecroySSRL,self).__init__(self.config['ip'])
-        self.inst.timeout=5*60*1000
+        self.inst.timeout=5000*60*1000
         self.inst.write("STST ALL_DISPLAYED,HDD,AUTO,WRAP,FORMAT,BINARY")
         self.createDir(r"ssrl")
         self.createDir(self.runPrefix)
@@ -25,8 +30,8 @@ class LecroySSRL(LecroyWavepro725zi):
         self.inst.write(r'DIR DISK,HDD,ACTION,CREATE,"C:\Users\lecroy\Desktop\%s"'%name)
         self.changeDir(name)
     def changeDir(self,name):
+        #self.inst.write(r'DIR "C:\Users\lecroy\Desktop\%s"'%name)
         self.inst.write(r'DIR DISK,HDD,ACTION,SWITCH,"C:\Users\lecroy\Desktop\%s"'%name)
-    
         
     #Under the unfortunate cercumtstance that the motor trigger is never recieved
     #This function is run in an attempt to recover the program.
@@ -47,7 +52,7 @@ class LecroySSRL(LecroyWavepro725zi):
             sec=int(self.config['time']['motor'])
                     
         start=time.time()
-        print("Will wait %d sec for trigger."%sec)
+        print("Will wait %d sec for motor trigger."%sec)
         done=self.inst.query("ARM;WAIT %d;*OPC?"%sec)
         duration=time.time()-start
         if str(1) in done:
@@ -65,22 +70,29 @@ class LecroySSRL(LecroyWavepro725zi):
                 runTime=self.config['time']['beam']*60
             else:
                 runTime=self.config['time']['beam']
-        self.safePrint("Collecting beam data.")
+        self.safePrint("Collecting beam data for %.01f secconds."%runTime)
         start=time.time()
         self._armBeamTrigger()
         events=0
-        self.inst.write("STO ALL_DISPLAYED,FILE;")
-        while time.time()-start < runTime:
-            self.inst.write("ARM;WAIT;")
+        self.inst.write("STO ALL_DISPLAYED,DIR;")
+        duration=time.time()-start
+        while duration < runTime:
+            self.inst.write("ARM;WAIT 60;")
             self.inst.query("*OPC?")
             events+=1
-            if events==10: break
-            if events%1000==0:
-                duration=time.time()-start
-                print("In %.01f seconds we have recorded %d events at a rate of %.01f Hz."%(duration,events,events/duration))
+            duration=time.time()-start
+            if events%100==0:
+                print("In %.01f seconds we have recorded %d events at a rate of %.01f Hz; %.01f sec left."%(duration,events,events/duration,runTime-duration))
         duration=time.time()-start
         print("Collected %d events in %.01f seconds (%.01f Hz)."%(events,duration,events/duration))
-        #self.getMotor()
+        self.runData['totalEvents']+=events
+        self.runData['info']['position_%d'%self.runNumber]={
+            'numberOfEvents': events,
+            'eventIndex': self.runData['totalEvents']
+        }
+        with open('metadata_%s.yaml'%self.config['runName'],'w+') as f:
+            f.write(yaml.dump(self.runData,default_flow_style=False))
+        self.getMotor()
         
         
     def safePrint(self,text):
